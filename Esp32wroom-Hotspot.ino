@@ -9,26 +9,27 @@ const char* ssid = "ESP32-Hotspot";
 WebSocketsServer webSocket = WebSocketsServer(8080);
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-    switch(type) {
-        case WStype_DISCONNECTED:
-            Serial.printf("[%u] Disconnected!\n", num);
-            break;
-        case WStype_CONNECTED: {
-            IPAddress ip = webSocket.remoteIP(num);
-            Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-            webSocket.sendTXT(num, "Connected to ESP32 Hotspot");
-        }
-            break;
-        case WStype_TEXT:
-            Serial.printf("[%u] get Text: %s\n", num, payload);
-            // Echo back the received message
-            webSocket.sendTXT(num, payload);
-            break;
-    }
+  Serial.println("WebSocket event received");
+  switch(type) {
+      case WStype_DISCONNECTED:
+          Serial.printf("[%u] Disconnected!\n", num);
+          break;
+      case WStype_CONNECTED: {
+          IPAddress ip = webSocket.remoteIP(num);
+          Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
+          webSocket.sendTXT(num, "Connected to ESP32 Hotspot");
+      }
+          break;
+      case WStype_TEXT:
+          Serial.printf("[%u] get Text: %s\n", num, payload);
+          // Echo back the received message
+          webSocket.sendTXT(num, payload);
+          break;
+  }
 }
 
 void setup() {
-  Serial.begin(1152200);
+  Serial.begin(115200);
 
   // Start ESP32 in Access Point mode
   WiFi.softAP(ssid);
