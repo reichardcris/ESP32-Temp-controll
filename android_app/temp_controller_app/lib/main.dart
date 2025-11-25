@@ -36,8 +36,20 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _temperature = 22;
+  bool _isOn = true;
   WebSocketChannel? _channel;
   String? _deviceName;
+
+  void _togglePower() {
+    setState(() {
+      _isOn = !_isOn;
+    });
+    if (_isOn) {
+      _channel?.sink.add('power_on');
+    } else {
+      _channel?.sink.add('power_off');
+    }
+  }
 
   void _incrementTemperature() {
     if (_temperature < 30) {
@@ -71,33 +83,6 @@ class _MyHomePageState extends State<MyHomePage> {
          _deviceName = "ESP32-Hotspot";
          _channel = WebSocketChannel.connect(Uri.parse('ws://192.168.4.1:8080'));
        });
-    }
-  }
-
-  Future<void> _connectToDevice(String serviceName) async {
-    const String name = '_esp32ws._tcp.local';
-    final MDnsClient client = MDnsClient(
-      rawDatagramSocketFactory: (dynamic host, int port,
-              {bool? reuseAddress, bool? reusePort, int? ttl}) =>
-          RawDatagramSocket.bind(host, port,
-              reuseAddress: true, reusePort: false, ttl: 255),
-    );
-    await client.start();
-
-    await for (final SrvResourceRecord srv in client.lookup<SrvResourceRecord>(
-        ResourceRecordQuery.service(serviceName))) {
-      await for (final IPAddressResourceRecord ip
-          in client.lookup<IPAddressResourceRecord>(
-              ResourceRecordQuery.addressIPv4(srv.target))) {
-        
-        final wsUrl = 'ws://${ip.address.address}:${srv.port}';
-        setState(() {
-           _deviceName = serviceName.replaceAll(".$name", "");
-           _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
-        });
-        client.stop();
-        return;
-      }
     }
   }
 
@@ -139,8 +124,15 @@ class _MyHomePageState extends State<MyHomePage> {
             style: TextStyle(fontSize: 24),
           ),
           Text(
-            '$_temperature°C',
+            _isOn ? '$_temperature°C' : 'Off',
             style: const TextStyle(fontSize: 80, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 40),
+          IconButton(
+            icon: const Icon(Icons.power_settings_new),
+            iconSize: 80,
+            color: _isOn ? Colors.green : Colors.red,
+            onPressed: _togglePower,
           ),
           const SizedBox(height: 40),
           Row(
@@ -149,13 +141,13 @@ class _MyHomePageState extends State<MyHomePage> {
               IconButton(
                 icon: const Icon(Icons.arrow_downward),
                 iconSize: 80,
-                onPressed: _decrementTemperature,
+                onPressed: _isOn ? _decrementTemperature : null,
               ),
               const SizedBox(width: 80),
               IconButton(
                 icon: const Icon(Icons.arrow_upward),
                 iconSize: 80,
-                onPressed: _incrementTemperature,
+                onPressed: _isOn ? _incrementTemperature : null,
               ),
             ],
           ),
