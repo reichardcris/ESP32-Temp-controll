@@ -111,17 +111,27 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         break;
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
-      if (strcmp((char*)payload, "low") == 0) {
+      if (strcmp((char*)payload, "on") == 0) {
         lcd.setCursor(0, 1);
-        lcd.print("Temp set to Low");
+        lcd.print("Power ON        ");
+        Serial.println("Power on");
+        sendCommand(rawDataOn, sizeof(rawDataOn) / sizeof(rawDataOn[0]));
+      } else if (strcmp((char*)payload, "off") == 0) {
+        lcd.setCursor(0, 1);
+        lcd.print("Power OFF       ");
+        Serial.println("Power off");
+        sendCommand(rawDataOff, sizeof(rawDataOff) / sizeof(rawDataOff[0]));
+      } else if (strcmp((char*)payload, "temp_low") == 0) {
+        lcd.setCursor(0, 1);
+        lcd.print("Temp set to Low ");
         Serial.println("Low setting");
         sendCommand(rawDataLow, sizeof(rawDataLow) / sizeof(rawDataLow[0]));
-      } else if (strcmp((char*)payload, "medium") == 0) {
+      } else if (strcmp((char*)payload, "temp_medium") == 0) {
         Serial.println("Medium setting");
         lcd.setCursor(0, 1);
-        lcd.print("Temp set to Medium");
+        lcd.print("Temp set to Med ");
         sendCommand(rawDataMedium, sizeof(rawDataMedium) / sizeof(rawDataMedium[0]));
-      } else if (strcmp((char*)payload, "high") == 0) {
+      } else if (strcmp((char*)payload, "temp_high_freeze") == 0) {
         Serial.println("High setting");
         lcd.setCursor(0, 1);
         lcd.print("Temp set to High");
