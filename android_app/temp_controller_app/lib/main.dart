@@ -40,7 +40,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  bool _isOn = true;
+  bool _isOn = false;
   TempSetting _tempSetting = TempSetting.low;
   WebSocketChannel? _channel;
   String? _deviceName;
@@ -150,6 +150,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget buildTemperatureControls() {
+    
+    print("_isOn : $_isOn");
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -171,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const SizedBox(height: 40),
           FlutterOKnob(
-            knobvalue: 0,
+            knobvalue: _tempSetting.index.toDouble(),
             knobLabel: Text(_tempSetting.toString().split('.').last.replaceAll('highFreeze', 'HIGH FREEZE').toUpperCase()),
             minValue: 0,
             maxValue: 2,
@@ -180,6 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
             outerRingGradient: const LinearGradient(colors: [Colors.deepPurple, Colors.blue]),
             maxRotationAngle: 180,
             onChanged: (value) {
+              if (!_isOn) return;
               int roundedValue = value.round();
               if (roundedValue != _tempSetting.index) {
                 _setTempSetting(TempSetting.values[roundedValue]);
